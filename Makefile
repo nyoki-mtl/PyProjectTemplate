@@ -1,7 +1,10 @@
 PROJECT ?= myproject
 DATADIR ?= ${PWD}/data
+WORKDIR ?= ${PWD}/work_dirs
 WORKSPACE ?= /workspace/$(PROJECT)
 DOCKER_IMAGE ?= ${PROJECT}:latest
+LOCAL_UID ?= 1000
+LOCAL_GID ?= 1000
 
 SHMSIZE ?= 100G
 DOCKER_OPTS := \
@@ -10,11 +13,13 @@ DOCKER_OPTS := \
 			--shm-size=${SHMSIZE} \
 			-v ${PWD}:${WORKSPACE} \
 			-v ${DATADIR}:${WORKSPACE}/data \
-			-v ${LOG_DIR}:${WORKSPACE}/work_dirs/logs \
-      -w ${WORKSPACE} \
+			-v ${WORKDIR}:${WORKSPACE}/work_dirs \
+			-w ${WORKSPACE} \
 			--ipc=host \
 			--network=host \
-			--gpus all
+			--gpus all \
+			-e LOCAL_UID=${LOCAL_UID} \
+			-e LOCAL_GID=${LOCAL_GID}
 
 docker-build:
 	docker build -f docker/Dockerfile -t ${DOCKER_IMAGE} .
